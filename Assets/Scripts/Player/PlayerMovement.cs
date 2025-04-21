@@ -11,13 +11,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        // Cache the Rigidbody2D component
         rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
-        // Read input
         float moveX = 0f;
         float moveY = 0f;
 
@@ -26,13 +24,11 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.A)) moveX -= 1f;
         if (Input.GetKey(KeyCode.D)) moveX += 1f;
 
-        // Normalize to ensure consistent speed in all directions
         movement = new Vector2(moveX, moveY).normalized;
     }
 
     void FixedUpdate()
     {
-        // Move the player
         rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
     }
 }
