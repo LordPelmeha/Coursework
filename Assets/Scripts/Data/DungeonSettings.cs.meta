@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: c76c27dd20bf2df4ba75d22e4615ea8d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - groundTilemap: {instanceID: 0}
+  - wallTilemap: {instanceID: 0}
+  - groundTile: {fileID: 11400000, guid: ca8b5b486afab964e9cc2c4985c51c82, type: 2}
+  - wallTile: {fileID: 11400000, guid: dcda9c70410365642ac0c2381b692039, type: 2}
+  - playerPrefab: {instanceID: 0}
+  - exitPrefab: {instanceID: 0}
+  - enemyPrefab: {instanceID: 0}
+  - chestPrefab: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
