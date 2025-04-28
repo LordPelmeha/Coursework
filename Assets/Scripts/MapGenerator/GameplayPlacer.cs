@@ -14,8 +14,14 @@ public static class GameplayPlacer
         Vector3 worldStart = settings.groundTilemap
             .CellToWorld(new Vector3Int(start.x, start.y, 0))
             + settings.groundTilemap.cellSize / 2;
-        GameObject.Instantiate(settings.playerPrefab, worldStart, Quaternion.identity);
+        GameObject player = GameObject.Instantiate(settings.playerPrefab, worldStart, Quaternion.identity);
 
+        // Дополнительные действия с игроком, например, установка камеры
+        CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
+        if (cameraFollow != null)
+        {
+            cameraFollow.target = player.transform;  // Камера будет следовать за игроком
+        }
         // 2) Финал
         int farIdx = 0;
         float maxD = -1f;
