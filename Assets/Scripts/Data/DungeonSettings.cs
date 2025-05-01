@@ -32,8 +32,8 @@ public class DungeonSettings : ScriptableObject
     [Header("Gameplay Prefabs")]
     public GameObject playerPrefab;
     public GameObject exitPrefab;
-    public GameObject enemyPrefab;
+   // public GameObject enemyPrefab;
     public float enemySpawnChance = 0.1f;
-    public GameObject chestPrefab;
+   // public GameObject chestPrefab;
     public float chestSpawnChance = 0.05f;
 }

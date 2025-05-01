@@ -11,11 +11,13 @@ public static class TilemapBuilder
     /// </summary>
     public static void Build(RoomLayout layout, List<RectInt> corridors)
     {
+        Debug.Log($"Build: rooms={layout.Rooms.Count}, corridors={corridors.Count}");
         var groundMap = layout.Settings.groundTilemap;
         var wallMap = layout.Settings.wallTilemap;
         var groundTile = layout.Settings.groundTile;
         var wallTile = layout.Settings.wallTile;
-
+        if (groundMap == null || groundTile == null)
+            Debug.LogError("TilemapBuilder: groundMap или groundTile не назначены!");
         groundMap.ClearAllTiles();
         wallMap.ClearAllTiles();
 
@@ -25,9 +27,13 @@ public static class TilemapBuilder
         // локальна€ карта: 0 = пол, 1 = стена
         int[,] map = new int[width, height];
 
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                map[x, y] = 1;
         // 1) ¬ырезаем комнаты, но с проверкой границ
         foreach (var room in layout.Rooms)
         {
+            Debug.Log($"Room carve: {room}");
             int xStart = Mathf.Max(0, room.xMin);
             int xEnd = Mathf.Min(width, room.xMax);
             int yStart = Mathf.Max(0, room.yMin);
@@ -41,6 +47,7 @@ public static class TilemapBuilder
         // 2) ¬ырезаем коридоры, тоже с проверкой
         foreach (var c in corridors)
         {
+            Debug.Log($"Corridor carve: {c}");
             int xStart = Mathf.Max(0, c.xMin);
             int xEnd = Mathf.Min(width, c.xMax);
             int yStart = Mathf.Max(0, c.yMin);
@@ -52,14 +59,16 @@ public static class TilemapBuilder
         }
 
         // 3) ќтрисовываем пол
+        int painted = 0;
         for (int x = 0; x < width; x++)
-        {
             for (int y = 0; y < height; y++)
-            {
                 if (map[x, y] == 0)
+                {
                     groundMap.SetTile(new Vector3Int(x, y, 0), groundTile);
-            }
-        }
+                    painted++;
+
+                }
+        Debug.Log($"TilemapBuilder: painted floor tiles = {painted}");
 
         // 4) ќтрисовываем стены вокруг пола
         Vector2Int[] dirs = {
@@ -86,5 +95,6 @@ public static class TilemapBuilder
                 }
             }
         }
+
     }
 }

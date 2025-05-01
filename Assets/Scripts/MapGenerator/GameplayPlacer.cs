@@ -51,13 +51,13 @@ public static class GameplayPlacer
         GameObject.Instantiate(settings.exitPrefab, worldEnd, Quaternion.identity);
 
         // 3) Враги и сундуки
-        foreach (var room in layout.Rooms)
-        {
-            if (Random.value < settings.enemySpawnChance)
-                SpawnRandom(room, settings.enemyPrefab, settings);
-            if (Random.value < settings.chestSpawnChance)
-                SpawnRandom(room, settings.chestPrefab, settings);
-        }
+        //foreach (var room in layout.Rooms)
+        //{
+        //    if (Random.value < settings.enemySpawnChance)
+        //        SpawnRandom(room, settings.enemyPrefab, settings);
+        //    if (Random.value < settings.chestSpawnChance)
+        //        SpawnRandom(room, settings.chestPrefab, settings);
+        //}
     }
 
     private static void SpawnRandom(RectInt room, GameObject prefab, DungeonSettings settings)

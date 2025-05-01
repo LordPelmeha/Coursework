@@ -26,6 +26,7 @@ public class DungeonGenerator : MonoBehaviour
 
         // Отрисовка Tilemap (пол и стены)
         TilemapBuilder.Build(layout, corridors);
+        Debug.Log(">> TilemapBuilder.Build вызван");
 
         // Спавн игрока, выхода, врагов, сундуков
         GameplayPlacer.Place(layout, settings);

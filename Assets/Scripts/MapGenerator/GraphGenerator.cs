@@ -20,6 +20,7 @@ public static class GraphGenerator
             int y = rnd.Next(1, settings.mapHeight - 1);
             nodes.Add(new Vector2Int(x, y));
         }
+        Debug.Log($"GraphGenerator: сгенерировано узлов = {nodes.Count}");
 
         // 2) Построение MST (гарантия связности)
         var edges = new HashSet<Edge>();

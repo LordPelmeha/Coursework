@@ -10,25 +10,52 @@ public static class DungeonValidator
         int height = layout.Settings.mapHeight;
 
         bool[,] walkable = new bool[width, height];
-        // ѕомечаем комнаты и коридоры как проходимые
+
+        // Ћокальна€ функци€ дл€ обрезки диапазона [min..max) в пределах [0..limit]
+        (int start, int end) ClampRange(int min, int max, int limit)
+        {
+            int s = Mathf.Max(0, min);
+            int e = Mathf.Min(limit, max);
+            return (s, e);
+        }
+
+        // 1) ѕомечаем комнаты как проходимые
         foreach (var room in layout.Rooms)
-            for (int x = room.xMin; x < room.xMax; x++)
-                for (int y = room.yMin; y < room.yMax; y++)
+        {
+            var (x0, x1) = ClampRange(room.xMin, room.xMax, width);
+            var (y0, y1) = ClampRange(room.yMin, room.yMax, height);
+            for (int x = x0; x < x1; x++)
+                for (int y = y0; y < y1; y++)
                     walkable[x, y] = true;
+        }
 
+        // 2) ѕомечаем коридоры как проходимые
         foreach (var c in layout.Corridors)
-            for (int x = c.xMin; x < c.xMax; x++)
-                for (int y = c.yMin; y < c.yMax; y++)
+        {
+            var (x0, x1) = ClampRange(c.xMin, c.xMax, width);
+            var (y0, y1) = ClampRange(c.yMin, c.yMax, height);
+            for (int x = x0; x < x1; x++)
+                for (int y = y0; y < y1; y++)
                     walkable[x, y] = true;
+        }
 
-        // BFS от центра стартовой комнаты
+        // 3) BFS от центра стартовой комнаты
         Vector2 startF = layout.Rooms[0].center;
         Vector2Int start = new Vector2Int(
             Mathf.RoundToInt(startF.x),
             Mathf.RoundToInt(startF.y)
         );
+
         var visited = new bool[width, height];
         var queue = new Queue<Vector2Int>();
+
+        // ѕроверим, что start внутри карты
+        if (start.x < 0 || start.x >= width || start.y < 0 || start.y >= height)
+        {
+            Debug.LogError("DungeonValidator: стартова€ точка вне границ карты!");
+            return;
+        }
+
         visited[start.x, start.y] = true;
         queue.Enqueue(start);
 
@@ -42,7 +69,8 @@ public static class DungeonValidator
             var cur = queue.Dequeue();
             foreach (var d in dirs)
             {
-                int nx = cur.x + d.x, ny = cur.y + d.y;
+                int nx = cur.x + d.x;
+                int ny = cur.y + d.y;
                 if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
                 if (!visited[nx, ny] && walkable[nx, ny])
                 {
@@ -52,17 +80,21 @@ public static class DungeonValidator
             }
         }
 
-        // ѕровер€ем достижимость каждой комнаты
+        // 4) ѕровер€ем достижимость каждой комнаты
         foreach (var room in layout.Rooms)
         {
+            var (x0, x1) = ClampRange(room.xMin, room.xMax, width);
+            var (y0, y1) = ClampRange(room.yMin, room.yMax, height);
+
             bool reached = false;
-            for (int x = room.xMin; x < room.xMax && !reached; x++)
-                for (int y = room.yMin; y < room.yMax; y++)
+            for (int x = x0; x < x1 && !reached; x++)
+                for (int y = y0; y < y1; y++)
                     if (visited[x, y])
                     {
                         reached = true;
                         break;
                     }
+
             if (!reached)
                 Debug.LogError($" омната {room} недостижима от старта!");
         }
