@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour
@@ -7,12 +9,17 @@ public class DungeonGenerator : MonoBehaviour
 
     private RoomLayout layout;
 
-    private void Start()
+    private void Awake()
     {
+        settings.seed = DateTime.Now.GetHashCode();
         GenerateDungeon();
     }
-
-    public void GenerateDungeon()
+    private void Start()
+    {
+        // Спавн игрока, выхода, врагов, сундуков
+        GameplayPlacer.Place(layout, settings);
+    }
+    private void GenerateDungeon()
     {
         // Генерация графа комнат
         RoomGraph graph = GraphGenerator.Generate(settings);
@@ -28,10 +35,9 @@ public class DungeonGenerator : MonoBehaviour
         TilemapBuilder.Build(layout, corridors);
         Debug.Log(">> TilemapBuilder.Build вызван");
 
-        // Спавн игрока, выхода, врагов, сундуков
-        GameplayPlacer.Place(layout, settings);
-
         // Проверка связности и целостности уровня
         DungeonValidator.Validate(layout);
+
     }
+
 }

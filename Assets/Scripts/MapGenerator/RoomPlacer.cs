@@ -29,7 +29,7 @@ public static class RoomPlacer
             rooms.Add(room);
         }
 
-        return new RoomLayout(graph, rooms,settings);
+        return new RoomLayout(graph, rooms, settings);
     }
 
     private static RectInt TryPlaceRoom(int cx, int cy, int w, int h, List<RectInt> existing, DungeonSettings settings)
@@ -55,7 +55,12 @@ public static class RoomPlacer
             }
 
             if (!overlaps)
+            {
+                candidate.x = Mathf.Clamp(candidate.x, 0, settings.mapWidth - candidate.width);
+                candidate.y = Mathf.Clamp(candidate.y, 0, settings.mapHeight - candidate.height);
                 return candidate;
+            }
+
 
             // Спираль: чередуем смещение по x/y и направление
             int dx = (attempt % 2 == 0 ? (attempt / 2 + 1) : -(attempt / 2 + 1));
