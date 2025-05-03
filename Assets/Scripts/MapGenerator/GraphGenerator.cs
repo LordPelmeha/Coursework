@@ -1,28 +1,33 @@
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 public static class GraphGenerator
 {
     /// <summary>
-    /// Генерирует граф комнат на основе настроек.
-    /// Каждая вершина связывается минимум одним ребром (MST),
-    /// а затем — ещё neighborCount ребрами к ближайшим соседям.
+    /// Генерирует связный граф комнат:
+    /// – центры узлов отодвинуты от краёв на margin = roomMaxSize/2;
+    /// – гарантируем MST, а затем добавляем neighborCount ближайших соседей.
     /// </summary>
     public static RoomGraph Generate(DungeonSettings settings)
     {
-        // 1) Случайные узлы (центры комнат)
-        List<Vector2Int> nodes = new List<Vector2Int>();
         var rnd = new System.Random(settings.seed);
+        int margin = Mathf.CeilToInt(settings.roomMaxSize / 2f);
+        int wLimit = settings.mapWidth - margin;
+        int hLimit = settings.mapHeight - margin;
+
+        var nodes = new List<Vector2Int>();
         for (int i = 0; i < settings.roomCount; i++)
         {
-            int x = rnd.Next(1, settings.mapWidth - 1);
-            int y = rnd.Next(1, settings.mapHeight - 1);
+            int x = rnd.Next(margin, wLimit);
+            int y = rnd.Next(margin, hLimit);
             nodes.Add(new Vector2Int(x, y));
         }
+
         Debug.Log($"GraphGenerator: сгенерировано узлов = {nodes.Count}");
 
-        // 2) Построение MST (гарантия связности)
+        // 2) MST
         var edges = new HashSet<Edge>();
         var used = new HashSet<int> { 0 };
         var unused = new HashSet<int>(Enumerable.Range(1, nodes.Count - 1));
@@ -31,33 +36,30 @@ public static class GraphGenerator
         {
             float bestDist = float.MaxValue;
             int bestU = -1, bestV = -1;
-
             foreach (int u in used)
                 foreach (int v in unused)
                 {
-                    Vector2Int diff = nodes[u] - nodes[v];
+                    var diff = nodes[u] - nodes[v];
                     float d = diff.x * diff.x + diff.y * diff.y;
                     if (d < bestDist)
                     {
                         bestDist = d;
-                        bestU = u;
-                        bestV = v;
+                        bestU = u; bestV = v;
                     }
                 }
-
             edges.Add(new Edge(bestU, bestV));
             used.Add(bestV);
             unused.Remove(bestV);
         }
 
-        // 3) Для каждого узла добавляем neighborCount ближайших соседей
+        // 3) neighbour links
         for (int i = 0; i < nodes.Count; i++)
         {
-            // Сортируем остальные узлы по квадрату расстояния
             var nearest = Enumerable.Range(0, nodes.Count)
                 .Where(j => j != i)
-                .OrderBy(j => {
-                    Vector2Int diff = nodes[i] - nodes[j];
+                .OrderBy(j =>
+                {
+                    var diff = nodes[i] - nodes[j];
                     return diff.x * diff.x + diff.y * diff.y;
                 })
                 .Take(settings.neighborCount);
@@ -66,7 +68,6 @@ public static class GraphGenerator
                 edges.Add(new Edge(i, j));
         }
 
-        // 4) Возвращаем граф
         return new RoomGraph(nodes, edges.ToList());
     }
 }

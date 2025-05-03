@@ -1,77 +1,81 @@
+п»їusing System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class RoomPlacer
 {
     /// <summary>
-    /// Размещает прямоугольные комнаты на сетке на основе графа.
-    /// Гарантирует отсутствие пересечений — если новая комната пересекается,
-    /// пытается сместить её по спирали вокруг узла.
+    /// Р Р°Р·РјРµС‰Р°РµС‚ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅС‹Рµ РєРѕРјРЅР°С‚С‹ РїРѕ РіСЂР°С„Сѓ:
+    /// вЂ“ РїСЂРѕР±СѓРµРј РїРѕСЃС‚Р°РІРёС‚СЊ РїРѕ СЃРїРёСЂР°Р»Рё С‚Р°Рє, С‡С‚РѕР±С‹ РЅРµ РїРµСЂРµСЃРµРєР°Р»РёСЃСЊ;
+    /// вЂ“ РєР°Рє С‚РѕР»СЊРєРѕ РЅР°С€Р»Рё РїРѕР»РѕР¶РµРЅРёРµ Р±РµР· РїРµСЂРµСЃРµС‡РµРЅРёР№, Р¶С‘СЃС‚РєРѕ РєР»СЌРјРїРёРј
+    ///   РІ РіСЂР°РЅРёС†С‹ РєР°СЂС‚С‹ Рё РІРѕР·РІСЂР°С‰Р°РµРј.
     /// </summary>
     public static RoomLayout Place(RoomGraph graph, DungeonSettings settings)
     {
-        var rooms = new List<RectInt>();
         var rnd = new System.Random(settings.seed);
+        var rooms = new List<RectInt>();
 
         foreach (var node in graph.Nodes)
         {
-            // Размер комнаты
+            // СЃР»СѓС‡Р°Р№РЅС‹Р№ СЂР°Р·РјРµСЂ
             int w = rnd.Next(settings.roomMinSize, settings.roomMaxSize + 1);
             int h = rnd.Next(settings.roomMinSize, settings.roomMaxSize + 1);
 
-            // Центр узла
-            int cx = node.x;
-            int cy = node.y;
-
-            // Попытка разместить комнату по спирали
-            RectInt room = TryPlaceRoom(cx, cy, w, h, rooms, settings);
-
+            // РїС‹С‚Р°РµРјСЃСЏ СЂР°Р·РјРµСЃС‚РёС‚СЊ Рё СЃСЂР°Р·Сѓ РєР»СЌРјРїРёРј РІ РіСЂР°РЅРёС†С‹
+            var room = TryPlaceRoom(node.x, node.y, w, h, rooms, settings);
             rooms.Add(room);
         }
 
-        return new RoomLayout(graph, rooms, settings);
+        // С„РѕСЂРјРёСЂСѓРµРј РёС‚РѕРіРѕРІС‹Р№ Layout Рё СЃСЂР°Р·Сѓ РіРµРЅРµСЂРёРј РєРѕСЂРёРґРѕСЂС‹
+        var layout = new RoomLayout(graph, rooms, settings);
+        var corridors = CorridorConnector.Connect(layout);
+        layout.SetCorridors(corridors);
+        return layout;
     }
 
-    private static RectInt TryPlaceRoom(int cx, int cy, int w, int h, List<RectInt> existing, DungeonSettings settings)
+    private static RectInt TryPlaceRoom(
+        int cx, int cy,
+        int w, int h,
+        List<RectInt> existing,
+        DungeonSettings settings)
     {
-        // Начнём с по-центру узла
-        int x = cx - w / 2;
-        int y = cy - h / 2;
-        RectInt candidate = new RectInt(x, y, w, h);
+        // Р±Р°Р·РѕРІР°СЏ РїРѕР·РёС†РёСЏ В«РїРѕ С†РµРЅС‚СЂСѓ СѓР·Р»Р°В»
+        int baseX = cx - w / 2;
+        int baseY = cy - h / 2;
+        var candidate = new RectInt(baseX, baseY, w, h);
 
-        // Проверяем и смещаем по спирали, пока не найдём свободное место
-        int attempt = 0;
         int maxAttempts = settings.maxRoomPlacementAttempts;
-        while (attempt < maxAttempts)
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            bool overlaps = false;
-            foreach (var other in existing)
-            {
-                if (candidate.Overlaps(other))
-                {
-                    overlaps = true;
-                    break;
-                }
-            }
-
+            // РµСЃР»Рё РЅРµ РїРµСЂРµСЃРµРєР°РµС‚СЃСЏ вЂ” РєР»СЌРјРїРёРј Рё РІРѕР·РІСЂР°С‰Р°РµРј
+            bool overlaps = existing.Any(o => o.Overlaps(candidate));
             if (!overlaps)
             {
-                candidate.x = Mathf.Clamp(candidate.x, 0, settings.mapWidth - candidate.width);
-                candidate.y = Mathf.Clamp(candidate.y, 0, settings.mapHeight - candidate.height);
-                return candidate;
+                int clampedX = Mathf.Clamp(candidate.x,
+                    0, settings.mapWidth - w);
+                int clampedY = Mathf.Clamp(candidate.y,
+                    0, settings.mapHeight - h);
+                return new RectInt(clampedX, clampedY, w, h);
             }
 
+            // РёРЅР°С‡Рµ СЃРїРёСЂР°Р»СЊРЅРѕРµ СЃРјРµС‰РµРЅРёРµ
+            int dx = (attempt % 2 == 0
+                ? (attempt / 2 + 1)
+                : -(attempt / 2 + 1));
+            int dy = (attempt % 4 < 2
+                ? 0
+                : (attempt / 4 + 1) * (attempt % 8 < 4 ? 1 : -1));
 
-            // Спираль: чередуем смещение по x/y и направление
-            int dx = (attempt % 2 == 0 ? (attempt / 2 + 1) : -(attempt / 2 + 1));
-            int dy = (attempt % 4 < 2 ? 0 : (attempt / 4 + 1) * (attempt % 8 < 4 ? 1 : -1));
-
-            candidate.x = cx - w / 2 + dx;
-            candidate.y = cy - h / 2 + dy;
-            attempt++;
+            candidate.x = baseX + dx;
+            candidate.y = baseY + dy;
         }
 
-        // Если не получилось разместить — возвращаем комнату на узле хотя бы ровно по центру
-        return new RectInt(cx - w / 2, cy - h / 2, w, h);
+        // РїРѕ РѕРєРѕРЅС‡Р°РЅРёРё РїРѕРїС‹С‚РѕРє вЂ” РІСЃС‘ СЂР°РІРЅРѕ РєР»СЌРјРїРёРј
+        int finalX = Mathf.Clamp(candidate.x,
+            0, settings.mapWidth - w);
+        int finalY = Mathf.Clamp(candidate.y,
+            0, settings.mapHeight - h);
+        return new RectInt(finalX, finalY, w, h);
     }
 }
