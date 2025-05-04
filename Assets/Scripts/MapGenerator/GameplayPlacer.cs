@@ -1,4 +1,5 @@
 // Assets/Scripts/MapGenerator/GameplayPlacer.cs
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class GameplayPlacer
@@ -7,45 +8,43 @@ public static class GameplayPlacer
     {
         // 1) Спавн игрока внутри стартовой комнаты
         RectInt startRoom = layout.Rooms[0];
-        // выбираем случайную точку внутри комнаты, не на самой границе
-        int spawnX = Random.Range(startRoom.xMin + 1, startRoom.xMax - 1);
-        int spawnY = Random.Range(startRoom.yMin + 1, startRoom.yMax - 1);
+        Debug.Log($"GameplayPlacer: StartRoom = x[{startRoom.xMin}..{startRoom.xMax}) y[{startRoom.yMin}..{startRoom.yMax})");
 
-        spawnX = Mathf.Clamp(spawnX, 0, settings.mapWidth - 1);
-        spawnY = Mathf.Clamp(spawnY, 0, settings.mapHeight - 1);
+        // 2) Ищем spawnCell
+        Vector3Int spawnCell = FindValidGroundCell(startRoom, layout);
+        Debug.Log($"GameplayPlacer: spawnCell (cell coords) = {spawnCell}");
 
-        Vector3Int spawnCell = new Vector3Int(spawnX, spawnY, 0);
-
-        // переводим в мировые координаты и немного смещаем по Z, чтобы игрок был перед полом
-        Vector3 worldStart = settings.groundTilemap.CellToWorld(spawnCell);
+        Vector3 worldStart = settings.groundTilemap.GetCellCenterWorld(spawnCell);
+        Debug.Log($"GameplayPlacer: worldStart (world coords) = {worldStart}");
         worldStart.z = -1f;
+        Debug.Log($"Ground Tilemap transform.position = {settings.groundTilemap.transform.position}");
 
-        GameObject player = GameObject.Instantiate(
-            settings.playerPrefab,
-            worldStart,
-            Quaternion.identity
-        );
+        var player = GameObject.Instantiate(settings.playerPrefab, worldStart, Quaternion.identity);
+        Debug.Log($"GameplayPlacer: Player instantiated at {worldStart}");
+        ;
 
-        // подключаем камеру к игроку
-        CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
+        // Привязываем камеру
+        var cameraFollow = Camera.main.GetComponent<CameraFollow>();
         if (cameraFollow != null)
+        {
             cameraFollow.target = player.transform;
+            Debug.Log("GameplayPlacer: Camera target assigned");
 
-        // 2) Спавн выхода — на максимально удалённой комнате
+        }
+
+        // 2) Спавн выхода — в самой удалённой комнате от spawnCell
+        Vector2Int startCell2D = new Vector2Int(spawnCell.x, spawnCell.y);
         int farIdx = 0;
         float maxDist2 = -1f;
-        // пересчитываем центр старой комнаты как Vector2Int, чтобы сравнивать правильно
-        Vector2Int startCell = new Vector2Int(spawnX, spawnY);
 
         for (int i = 1; i < layout.Rooms.Count; i++)
         {
             RectInt room = layout.Rooms[i];
-            Vector2Int roomCenter = new Vector2Int(
-                Mathf.FloorToInt((room.xMin + room.xMax) * 0.5f),
-                Mathf.FloorToInt((room.yMin + room.yMax) * 0.5f)
+            Vector2Int center = new Vector2Int(
+                (room.xMin + room.xMax) / 2,
+                (room.yMin + room.yMax) / 2
             );
-
-            Vector2Int delta = roomCenter - startCell;
+            Vector2Int delta = center - startCell2D;
             float dist2 = delta.x * delta.x + delta.y * delta.y;
             if (dist2 > maxDist2)
             {
@@ -55,37 +54,112 @@ public static class GameplayPlacer
         }
 
         RectInt endRoom = layout.Rooms[farIdx];
-        int exitX = Random.Range(endRoom.xMin + 1, endRoom.xMax - 1);
-        int exitY = Random.Range(endRoom.yMin + 1, endRoom.yMax - 1);
-        Vector3Int exitCell = new Vector3Int(exitX, exitY, 0);
+        Debug.Log($"GameplayPlacer: EndRoom index = {farIdx}, x[{endRoom.xMin}..{endRoom.xMax}) y[{endRoom.yMin}..{endRoom.yMax})");
 
-        Vector3 worldEnd = settings.groundTilemap.CellToWorld(exitCell);
-        worldEnd.z = -1f;
+        Vector3Int exitCell = FindValidExitCell(endRoom, layout, settings);
+        Debug.Log($"GameplayPlacer: exitCell (cell coords) = {exitCell}");
+
+        Vector3 worldEnd = settings.groundTilemap.GetCellCenterWorld(exitCell);
+        Debug.Log($"GameplayPlacer: worldEnd (world coords) = {worldEnd}");
+
+        worldEnd.z = -0.1f;
 
         if (settings.exitPrefab != null)
-            GameObject.Instantiate(
-                settings.exitPrefab,
-                worldEnd,
-                Quaternion.identity
-            );
+        {
+            GameObject.Instantiate(settings.exitPrefab, worldEnd, Quaternion.identity);
+            Debug.Log("GameplayPlacer: Exit instantiated");
+        }
 
-        // 3) Спавн врагов и сундуков (по желанию)
-        //foreach (var room in layout.Rooms)
-        //{
-        //    if (settings.enemyPrefab != null && Random.value < settings.enemySpawnChance)
-        //        SpawnRandom(room, settings.enemyPrefab, settings);
-        //    if (settings.chestPrefab != null && Random.value < settings.chestSpawnChance)
-        //        SpawnRandom(room, settings.chestPrefab, settings);
-        //}
+
+        // 3) (опционально) спавн врагов/сундуков аналогичным способом:
+        // foreach (var room in layout.Rooms) {
+        //     Vector3Int cell = FindValidGroundCell(room, layout.MapData);
+        //     GameObject.Instantiate(settings.enemyPrefab, settings.groundTilemap.CellToWorld(cell) + Vector3.back, Quaternion.identity);
+        // }
     }
 
-    private static void SpawnRandom(RectInt room, GameObject prefab, DungeonSettings settings)
+    private static Vector3Int FindValidGroundCell(RectInt room,RoomLayout layout )
     {
-        int x = Random.Range(room.xMin + 1, room.xMax - 1);
-        int y = Random.Range(room.yMin + 1, room.yMax - 1);
-        Vector3Int cell = new Vector3Int(x, y, 0);
-        Vector3 worldPos = settings.groundTilemap.CellToWorld(cell);
-        worldPos.z = -1f;
-        GameObject.Instantiate(prefab, worldPos, Quaternion.identity);
+        var map = layout.MapData;
+        int w = map.GetLength(0);
+        int h = map.GetLength(1);
+
+        List<Vector3Int> candidates = new List<Vector3Int>();
+
+        // === ЛОГ ГРАНИЦ КОМНАТЫ ===
+        Debug.Log($"[DEBUG] Checking room bounds: x[{room.xMin}..{room.xMax}), y[{room.yMin}..{room.yMax})");
+
+        for (int x = room.xMin + 1; x < room.xMax - 1; x++)
+        {
+            for (int y = room.yMin + 1; y < room.yMax - 1; y++)
+            {
+                if (x >= 0 && x < w && y >= 0 && y < h)
+                {
+                    // === ЛОГ ПРОВЕРЯЕМЫХ КЛЕТОК ===
+                    if (map[x, y] == 0)
+                    {
+                        candidates.Add(new Vector3Int(x, y, 0));
+                        Debug.Log($"[DEBUG] Valid ground tile found at ({x},{y})");
+                    }
+                    else
+                    {
+                        Debug.Log($"[DEBUG] Tile at ({x},{y}) is wall");
+                    }
+                }
+                else
+                {
+                    Debug.Log($"[DEBUG] Tile at ({x},{y}) is out of bounds");
+                }
+            }
+        }
+
+        if (candidates.Count > 0)
+        {
+            var chosen = candidates[Random.Range(0, candidates.Count)];
+            Debug.Log($"[DEBUG] Chosen cell: {chosen}");
+            return chosen;
+        }
+
+        Debug.LogWarning("[DEBUG] No valid ground cells found in room — fallback to room origin");
+
+        int fx = Mathf.Clamp(room.xMin, 0, w - 1);
+        int fy = Mathf.Clamp(room.yMin, 0, h - 1);
+        return new Vector3Int(fx, fy, 0);
     }
+    // В начале вашего класса добавьте этот метод:
+    private static Vector3Int FindValidExitCell(RectInt room, RoomLayout layout, DungeonSettings settings)
+    {
+        var map = layout.MapData;
+        var groundMap = settings.groundTilemap;
+        var wallMap = settings.wallTilemap;
+        int w = map.GetLength(0), h = map.GetLength(1);
+        var candidates = new List<Vector3Int>();
+
+        // проходим по всем «внутренним» клеткам комнаты
+        for (int x = room.xMin + 1; x < room.xMax - 1; x++)
+            for (int y = room.yMin + 1; y < room.yMax - 1; y++)
+            {
+                if (x < 0 || x >= w || y < 0 || y >= h) continue;
+
+                var cell = new Vector3Int(x, y, 0);
+                // условие 1: это действительно пол
+                bool isFloor = map[x, y] == 0
+                               && groundMap.HasTile(cell);
+                // условие 2: в этой клетке нет стены
+                bool noWall = !wallMap.HasTile(cell);
+
+                if (isFloor && noWall)
+                    candidates.Add(cell);
+            }
+
+        if (candidates.Count > 0)
+            return candidates[Random.Range(0, candidates.Count)];
+
+        // фоллбэк на самый центр комнаты (или любой край, если хотите)
+        int fx = Mathf.Clamp((room.xMin + room.xMax) / 2, 0, w - 1);
+        int fy = Mathf.Clamp((room.yMin + room.yMax) / 2, 0, h - 1);
+        return new Vector3Int(fx, fy, 0);
+    }
+
+
 }

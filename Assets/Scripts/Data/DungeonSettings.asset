@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: DungeonSettings
   m_EditorClassIdentifier: 
   mapWidth: 200
-  mapHeight: 140
+  mapHeight: 200
   roomCount: 20
   extraBranches: 5
   neighborCount: 2
-  seed: -1
+  seed: 410094691
   roomMinSize: 5
   roomMaxSize: 15
   maxRoomPlacementAttempts: 50
-  randomCorridorOrientation: 1
+  randomCorridorOrientation: 0
   groundTilemap: {fileID: 7392467136901350562, guid: 1031c3bfd4f282a4290f9e1b0e91e747, type: 3}
   wallTilemap: {fileID: 4980607327542084402, guid: b6205b3d898b68c48a4578b67d61566c, type: 3}
   groundTile: {fileID: 11400000, guid: ca8b5b486afab964e9cc2c4985c51c82, type: 2}

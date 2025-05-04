@@ -1,43 +1,55 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class DungeonGenerator : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private DungeonSettings settings;
-
     private RoomLayout layout;
+    private DungeonSettings runtimeSettings;
 
     private void Awake()
     {
-        settings.seed = DateTime.Now.GetHashCode();
-        GenerateDungeon();
-    }
-    private void Start()
-    {
-        // Спавн игрока, выхода, врагов, сундуков
-        GameplayPlacer.Place(layout, settings);
-    }
-    private void GenerateDungeon()
-    {
-        // Генерация графа комнат
-        RoomGraph graph = GraphGenerator.Generate(settings);
+        runtimeSettings = Instantiate(settings);
+        runtimeSettings.seed = DateTime.Now.GetHashCode();
+        runtimeSettings.groundTilemap = GameObject.Find("Ground").GetComponent<Tilemap>();
+        runtimeSettings.wallTilemap = GameObject.Find("Wall").GetComponent<Tilemap>();
 
-        // Размещение комнат по графу
-        layout = RoomPlacer.Place(graph, settings);
+        // теперь можно править тайлмапы в runtimeSettings,
+        // а оригинальный ассет останется целым
 
-        // Построение коридоров и запись их в layout
+        GenerateDungeon(runtimeSettings);
+    }
+
+    public void GenerateDungeon(DungeonSettings runtimeSettings)
+    {
+        // 1) Генерим граф и комнаты
+        var graph = GraphGenerator.Generate(runtimeSettings);
+        layout = RoomPlacer.Place(graph, runtimeSettings);
+
+        // Логим все комнаты
+        for (int i = 0; i < layout.Rooms.Count; i++)
+        {
+            RectInt r = layout.Rooms[i];
+            Debug.Log($"DungeonGenerator: Room[{i}] = x[{r.xMin}..{r.xMax}) y[{r.yMin}..{r.yMax})");
+        }
+
+        // 2) Генерим коридоры
         var corridors = CorridorConnector.Connect(layout);
         layout.SetCorridors(corridors);
+        Debug.Log($"DungeonGenerator: Corridors.Count = {corridors.Count}");
 
-        // Отрисовка Tilemap (пол и стены)
+        // 3) Строим Tilemap
         TilemapBuilder.Build(layout, corridors);
-        Debug.Log(">> TilemapBuilder.Build вызван");
+        Debug.Log("DungeonGenerator: TilemapBuilder.Build завершён");
 
-        // Проверка связности и целостности уровня
+        // 4) Проверяем уровень
         DungeonValidator.Validate(layout);
 
+        // 5) Спавним игрока и выход
+        GameplayPlacer.Place(layout, runtimeSettings);
     }
 
 }

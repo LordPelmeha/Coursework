@@ -1,60 +1,61 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using UnityEngine;
 
 public static class CorridorConnector
 {
-    /// <summary>
-    /// Соединяет комнаты коридорами на основе графа и их прямоугольного расположения.
-    /// Для каждого ребра графа прокладывает L-образный коридор:
-    /// сначала по X, затем по Y (или наоборот), прямыми проходами в карте.
-    /// </summary>
     public static List<RectInt> Connect(RoomLayout layout)
     {
         var corridors = new List<RectInt>();
-        var nodes = layout.Graph.Nodes;
-        var edges = layout.Graph.Edges;
+        int mapW = layout.Settings.mapWidth;
+        int mapH = layout.Settings.mapHeight;
 
-        foreach (var edge in edges)
+        foreach (var edge in layout.Graph.Edges)
         {
-            Vector2 centerA = layout.Rooms[edge.a].center;
-            Vector2 centerB = layout.Rooms[edge.b].center;
-            Vector2Int aCenter = new Vector2Int(
-                Mathf.RoundToInt(centerA.x),
-                Mathf.RoundToInt(centerA.y)
-            );
-            Vector2Int bCenter = new Vector2Int(
-                Mathf.RoundToInt(centerB.x),
-                Mathf.RoundToInt(centerB.y)
-            );
-            // Решаем произвольно: 50% случаев сначала горизонтально, 50% — вертикально
-            bool horizontalFirst = (Random.value > 0.5f);
+            Vector2 cA = layout.Rooms[edge.a].center;
+            Vector2 cB = layout.Rooms[edge.b].center;
+            Vector2Int a = new Vector2Int(Mathf.RoundToInt(cA.x), Mathf.RoundToInt(cA.y));
+            Vector2Int b = new Vector2Int(Mathf.RoundToInt(cB.x), Mathf.RoundToInt(cB.y));
 
-            if (horizontalFirst)
+            bool horizFirst = Random.value > 0.5f;
+
+            if (horizFirst)
             {
-                // Горизонтальный сегмент
-                int xMin = Mathf.Min(aCenter.x, bCenter.x);
-                int xMax = Mathf.Max(aCenter.x, bCenter.x);
-                corridors.Add(new RectInt(xMin, aCenter.y, xMax - xMin + 1, 1));
+                // Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ СЃРµРіРјРµРЅС‚
+                int x0 = Mathf.Min(a.x, b.x), x1 = Mathf.Max(a.x, b.x);
+                RectInt h = new RectInt(x0, a.y - 1, x1 - x0 + 1, 3); // РІС‹СЃРѕС‚Р° = 3
+                ClampRect(ref h, mapW, mapH);
+                corridors.Add(h);
 
-                // Вертикальный сегмент
-                int yMin = Mathf.Min(aCenter.y, bCenter.y);
-                int yMax = Mathf.Max(aCenter.y, bCenter.y);
-                corridors.Add(new RectInt(bCenter.x, yMin, 1, yMax - yMin + 1));
+                // Р’РµСЂС‚РёРєР°Р»СЊРЅС‹Р№ СЃРµРіРјРµРЅС‚
+                int y0 = Mathf.Min(a.y, b.y), y1 = Mathf.Max(a.y, b.y);
+                RectInt v = new RectInt(b.x - 1, y0, 3, y1 - y0 + 1); // С€РёСЂРёРЅР° = 3
+                ClampRect(ref v, mapW, mapH);
+                corridors.Add(v);
             }
             else
             {
-                // Вертикальный сегмент
-                int yMin = Mathf.Min(aCenter.y, bCenter.y);
-                int yMax = Mathf.Max(aCenter.y, bCenter.y);
-                corridors.Add(new RectInt(aCenter.x, yMin, 1, yMax - yMin + 1));
+                // Р’РµСЂС‚РёРєР°Р»СЊРЅС‹Р№ СЃРµРіРјРµРЅС‚
+                int y0 = Mathf.Min(a.y, b.y), y1 = Mathf.Max(a.y, b.y);
+                RectInt v = new RectInt(a.x - 1, y0, 3, y1 - y0 + 1); // С€РёСЂРёРЅР° = 3
+                ClampRect(ref v, mapW, mapH);
+                corridors.Add(v);
 
-                // Горизонтальный сегмент
-                int xMin = Mathf.Min(aCenter.x, bCenter.x);
-                int xMax = Mathf.Max(aCenter.x, bCenter.x);
-                corridors.Add(new RectInt(xMin, bCenter.y, xMax - xMin + 1, 1));
+                // Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ СЃРµРіРјРµРЅС‚
+                int x0 = Mathf.Min(a.x, b.x), x1 = Mathf.Max(a.x, b.x);
+                RectInt h = new RectInt(x0, b.y - 1, x1 - x0 + 1, 3); // РІС‹СЃРѕС‚Р° = 3
+                ClampRect(ref h, mapW, mapH);
+                corridors.Add(h);
             }
         }
 
         return corridors;
+    }
+
+    private static void ClampRect(ref RectInt r, int mapW, int mapH)
+    {
+        if (r.xMin < 0) r.xMin = 0;
+        if (r.yMin < 0) r.yMin = 0;
+        if (r.xMax > mapW) r.xMax = mapW;
+        if (r.yMax > mapH) r.yMax = mapH;
     }
 }

@@ -131,6 +131,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wall
       objectReference: {fileID: 0}
+    - target: {fileID: 4980607327542084402, guid: b6205b3d898b68c48a4578b67d61566c, type: 3}
+      propertyPath: m_TileAnchor.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4980607327542084402, guid: b6205b3d898b68c48a4578b67d61566c, type: 3}
+      propertyPath: m_TileAnchor.y
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7396032328015852931, guid: b6205b3d898b68c48a4578b67d61566c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -609,6 +617,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4163791558925942394, guid: 1031c3bfd4f282a4290f9e1b0e91e747, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7392467136901350562, guid: 1031c3bfd4f282a4290f9e1b0e91e747, type: 3}
+      propertyPath: m_TileAnchor.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7392467136901350562, guid: 1031c3bfd4f282a4290f9e1b0e91e747, type: 3}
+      propertyPath: m_TileAnchor.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
