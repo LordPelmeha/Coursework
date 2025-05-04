@@ -13,7 +13,7 @@ public static class GraphGenerator
     public static RoomGraph Generate(DungeonSettings settings)
     {
         var rnd = new System.Random(settings.seed);
-        int margin = Mathf.CeilToInt(settings.roomMaxSize / 2f +1);
+        int margin = settings.roomMaxSize;
         int wLimit = settings.mapWidth - margin;
         int hLimit = settings.mapHeight - margin;
 
