@@ -17,12 +17,33 @@ public static class GraphGenerator
         int wLimit = settings.mapWidth - margin;
         int hLimit = settings.mapHeight - margin;
 
+        float minDist = settings.roomMaxSize; // минимальное расстояние между центрами
+        int maxAttemptsPerNode = 100;
+
         var nodes = new List<Vector2Int>();
-        for (int i = 0; i < settings.roomCount; i++)
+        bool placed = false;
+        while (!placed)
         {
-            int x = rnd.Next(margin, wLimit);
-            int y = rnd.Next(margin, hLimit);
-            nodes.Add(new Vector2Int(x, y));
+            while (nodes.Count < settings.roomCount)
+            {
+
+                for (int attempt = 0; attempt < maxAttemptsPerNode; attempt++)
+                {
+                    int x = rnd.Next(margin, wLimit);
+                    int y = rnd.Next(margin, hLimit);
+                    var candidate = new Vector2Int(x, y);
+
+                    // Проверка на достаточное расстояние до всех других узлов
+                    bool tooClose = nodes.Any(p => (p - candidate).sqrMagnitude < minDist * minDist);
+                    if (!tooClose)
+                    {
+                        nodes.Add(candidate);
+                        placed = true;
+                        break;
+                    }
+                }
+            }
+            if (!placed) minDist -= 1;
         }
 
         Debug.Log($"GraphGenerator: сгенерировано узлов = {nodes.Count}");
