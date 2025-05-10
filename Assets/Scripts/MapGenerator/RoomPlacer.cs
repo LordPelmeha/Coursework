@@ -29,7 +29,7 @@ public static class RoomPlacer
 
         // формируем итоговый Layout и сразу генерим коридоры
         var layout = new RoomLayout(graph, rooms, settings);
-        var corridors = CorridorConnector.Connect(layout);
+        var corridors = DrunkardWalkConnector.Connect(layout, settings);
         layout.SetCorridors(corridors);
         return layout;
     }
@@ -52,11 +52,11 @@ public static class RoomPlacer
             bool overlaps = existing.Any(o => o.Overlaps(candidate));
             if (!overlaps)
             {
-                int clampedX = Mathf.Clamp(candidate.x,
-                    0, settings.mapWidth - w);
-                int clampedY = Mathf.Clamp(candidate.y,
-                    0, settings.mapHeight - h);
-                return new RectInt(clampedX, clampedY, w, h);
+                //int clampedX = Mathf.Clamp(candidate.x,
+                //    0, settings.mapWidth - w);
+                //int clampedY = Mathf.Clamp(candidate.y,
+                //    0, settings.mapHeight - h);
+                return new RectInt(candidate.x, candidate.y, w, h);
             }
 
             // иначе спиральное смещение
@@ -72,10 +72,10 @@ public static class RoomPlacer
         }
 
         // по окончании попыток — всё равно клэмпим
-        int finalX = Mathf.Clamp(candidate.x,
-            0, settings.mapWidth - w);
-        int finalY = Mathf.Clamp(candidate.y,
-            0, settings.mapHeight - h);
-        return new RectInt(finalX, finalY, w, h);
+        //int finalX = Mathf.Clamp(candidate.x,
+        //    0, settings.mapWidth - w);
+        //int finalY = Mathf.Clamp(candidate.y,
+        //    0, settings.mapHeight - h);
+        return new RectInt(candidate.x, candidate.y, w, h);
     }
 }

@@ -37,9 +37,11 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         // 2) Генерим коридоры
-        var corridors = CorridorConnector.Connect(layout);
+        var corridors = DrunkardWalkConnector.Connect(layout, settings);
         layout.SetCorridors(corridors);
         Debug.Log($"DungeonGenerator: Corridors.Count = {corridors.Count}");
+
+        PostProcessor.Process(layout, settings);
 
         // 3) Строим Tilemap
         TilemapBuilder.Build(layout, corridors);

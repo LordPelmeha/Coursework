@@ -23,11 +23,21 @@ public class DungeonSettings : ScriptableObject
     [Tooltip("If true, corridors carve horizontally then vertically; otherwise vertically then horizontally.")]
     public bool randomCorridorOrientation = true;
 
+    [Header("Drunkard’s Walk Corridors")]
+    public int drunkardWalkLength = 100;
+    public float drunkardTurnAngle = 45f;   
+    public int corridorRadius = 1;
+
     [Header("Tilemaps & Tiles")]
     public Tilemap groundTilemap;
     public Tilemap wallTilemap;
     public TileBase groundTile;
     public TileBase wallTile;
+
+    [Header("Post-Processing")]
+    public int iterations = 3;
+    public int birthLimit = 4;
+    public int deathLimit = 3;
 
     [Header("Gameplay Prefabs")]
     public GameObject playerPrefab;
