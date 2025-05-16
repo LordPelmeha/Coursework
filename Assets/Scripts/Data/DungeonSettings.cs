@@ -13,6 +13,7 @@ public class DungeonSettings : ScriptableObject
     public int extraBranches = 5;
     public int neighborCount = 2;
     public int seed = 12345;
+    public bool isSeedConstant = false;
 
     [Header("Room Placement")]
     public int roomMinSize = 5;

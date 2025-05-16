@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class DungeonValidator
 {
-    public static void Validate(RoomLayout layout)
+    public static bool Validate(RoomLayout layout)
     {
         int width = layout.Settings.mapWidth;
         int height = layout.Settings.mapHeight;
@@ -53,7 +53,7 @@ public static class DungeonValidator
         if (start.x < 0 || start.x >= width || start.y < 0 || start.y >= height)
         {
             Debug.LogError("DungeonValidator: стартовая точка вне границ карты!");
-            return;
+            return false;
         }
 
         visited[start.x, start.y] = true;
@@ -96,7 +96,12 @@ public static class DungeonValidator
                     }
 
             if (!reached)
+            {
                 Debug.LogError($"Комната {room} недостижима от старта!");
+                return false;
+            }    
+                
         }
+        return true;
     }
 }

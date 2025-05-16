@@ -1,4 +1,3 @@
-// Assets/Scripts/MapGenerator/GameplayPlacer.cs
 using System.Collections.Generic;
 using UnityEngine;
 

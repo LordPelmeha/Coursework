@@ -18,11 +18,12 @@ MonoBehaviour:
   extraBranches: 5
   neighborCount: 2
   seed: 410094691
+  isSeedConstant: 0
   roomMinSize: 15
   roomMaxSize: 25
   maxRoomPlacementAttempts: 50
   randomCorridorOrientation: 1
-  drunkardWalkLength: 50
+  drunkardWalkLength: 70
   drunkardTurnAngle: 45
   corridorRadius: 1
   groundTilemap: {fileID: 7392467136901350562, guid: 1031c3bfd4f282a4290f9e1b0e91e747, type: 3}
@@ -31,7 +32,7 @@ MonoBehaviour:
   wallTile: {fileID: 11400000, guid: dcda9c70410365642ac0c2381b692039, type: 2}
   iterations: 4
   birthLimit: 5
-  deathLimit: 2
+  deathLimit: 5
   playerPrefab: {fileID: 8334850428379882331, guid: 6dcae20c53a13ef48808b06720eec60d, type: 3}
   exitPrefab: {fileID: 2942509222578191724, guid: ff0b07df33cc7c741aac1e900d0f6abe, type: 3}
   enemySpawnChance: 0.1

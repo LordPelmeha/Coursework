@@ -24,8 +24,10 @@ public static class PostProcessor
                     else
                         tmp[x, y] = (walls > settings.birthLimit) ? 1 : 0;
                 }
-            // копируем tmp → map
-            System.Array.Copy(tmp, map, w * h);
+
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    map[x, y] = tmp[x, y];
         }
     }
 

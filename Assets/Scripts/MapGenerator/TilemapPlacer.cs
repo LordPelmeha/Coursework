@@ -16,47 +16,14 @@ public static class TilemapBuilder
         var wallMap = layout.Settings.wallTilemap;
         var groundTile = layout.Settings.groundTile;
         var wallTile = layout.Settings.wallTile;
-        if (groundMap == null || groundTile == null)
-            Debug.LogError("TilemapBuilder: groundMap или groundTile не назначены!");
         groundMap.ClearAllTiles();
         wallMap.ClearAllTiles();
 
         int width = layout.Settings.mapWidth;
         int height = layout.Settings.mapHeight;
 
-        // локальна€ карта: 0 = пол, 1 = стена
-        int[,] map = new int[width, height];
+        int[,] map = layout.MapData;
 
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                map[x, y] = 1;
-        // 1) ¬ырезаем комнаты, но с проверкой границ
-        foreach (var room in layout.Rooms)
-        {
-            Debug.Log($"Room carve: {room}");
-            int xStart = Mathf.Max(0, room.xMin);
-            int xEnd = Mathf.Min(width, room.xMax);
-            int yStart = Mathf.Max(0, room.yMin);
-            int yEnd = Mathf.Min(height, room.yMax);
-
-            for (int x = xStart; x < xEnd; x++)
-                for (int y = yStart; y < yEnd; y++)
-                    map[x, y] = 0;
-        }
-
-        // 2) ¬ырезаем коридоры, тоже с проверкой
-        foreach (var c in corridors)
-        {
-            Debug.Log($"Corridor carve: {c}");
-            int xStart = Mathf.Max(0, c.xMin);
-            int xEnd = Mathf.Min(width, c.xMax);
-            int yStart = Mathf.Max(0, c.yMin);
-            int yEnd = Mathf.Min(height, c.yMax);
-
-            for (int x = xStart; x < xEnd; x++)
-                for (int y = yStart; y < yEnd; y++)
-                    map[x, y] = 0;
-        }
 
         // 3) ќтрисовываем пол
         int painted = 0;
