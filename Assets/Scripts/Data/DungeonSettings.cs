@@ -20,9 +20,9 @@ public class DungeonSettings : ScriptableObject
     public int roomMaxSize = 15;
     public int maxRoomPlacementAttempts = 50;
 
-    [Header("Corridor Settings")]
-    [Tooltip("If true, corridors carve horizontally then vertically; otherwise vertically then horizontally.")]
-    public bool randomCorridorOrientation = true;
+    //[Header("Corridor Settings")]
+    //[Tooltip("If true, corridors carve horizontally then vertically; otherwise vertically then horizontally.")]
+    //public bool randomCorridorOrientation = true;
 
     [Header("Drunkard’s Walk Corridors")]
     public int drunkardWalkLength = 100;

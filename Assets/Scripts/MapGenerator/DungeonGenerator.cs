@@ -21,6 +21,17 @@ public class DungeonGenerator : MonoBehaviour
         GenerateDungeon(runtimeSettings);
     }
 
+    void Start()
+    {
+        var rng = new System.Random(runtimeSettings.seed);
+
+        float r = (float)rng.NextDouble();
+        float g = (float)rng.NextDouble();
+        float b = (float)rng.NextDouble();
+
+        Camera.main.backgroundColor = new Color(r, g, b);
+    }
+
     public void GenerateDungeon(DungeonSettings runtimeSettings)
     {
         bool isValid=false;
