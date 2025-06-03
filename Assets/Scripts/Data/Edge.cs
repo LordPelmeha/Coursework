@@ -1,4 +1,3 @@
-// Assets/Scripts/Data/Edge.cs
 using System;
 
 [Serializable]
@@ -25,7 +24,6 @@ public struct Edge : IEquatable<Edge>
 
     public override int GetHashCode()
     {
-        // Ќезависимо от пор€дка (a,b) и (b,a) должен давать одинаковый hash
         int min = Math.Min(a, b);
         int max = Math.Max(a, b);
         unchecked

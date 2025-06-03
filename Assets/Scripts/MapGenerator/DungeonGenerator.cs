@@ -34,25 +34,18 @@ public class DungeonGenerator : MonoBehaviour
 
     public void GenerateDungeon(DungeonSettings runtimeSettings)
     {
-        bool isValid=false;
+        bool isValid = false;
         while (!isValid)
         {
-            // 1) Генерим граф и комнаты
+            // Генерируем граф и комнаты
             var graph = GraphGenerator.Generate(runtimeSettings);
             layout = RoomPlacer.Place(graph, runtimeSettings);
 
-            // Логим все комнаты
-            for (int i = 0; i < layout.Rooms.Count; i++)
-            {
-                RectInt r = layout.Rooms[i];
-                Debug.Log($"DungeonGenerator: Room[{i}] = x[{r.xMin}..{r.xMax}) y[{r.yMin}..{r.yMax})");
-            }
-
-            // 2) Генерим коридоры
+            // 2) Генерируем коридоры
             var corridors = DrunkardWalkConnector.Connect(layout, runtimeSettings);
             layout.SetCorridors(corridors);
-            Debug.Log($"DungeonGenerator: Corridors.Count = {corridors.Count}");
 
+            // 3) Пост-обработка карты
             PostProcessor.Process(layout, runtimeSettings);
 
             // 3) Проверяем уровень
@@ -61,16 +54,13 @@ public class DungeonGenerator : MonoBehaviour
             {
                 runtimeSettings.seed++;
                 continue;
-
             }
+
             // 4) Строим Tilemap
             TilemapBuilder.Build(layout, corridors);
-            Debug.Log("DungeonGenerator: TilemapBuilder.Build завершён");
 
             // 5) Спавним игрока и выход
             GameplayPlacer.Place(layout, runtimeSettings);
         }
-
     }
-
 }

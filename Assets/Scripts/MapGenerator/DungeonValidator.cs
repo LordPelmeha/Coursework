@@ -1,4 +1,3 @@
-// Assets/Scripts/MapGenerator/DungeonValidator.cs
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +10,6 @@ public static class DungeonValidator
 
         bool[,] walkable = new bool[width, height];
 
-        // Локальная функция для обрезки диапазона [min..max) в пределах [0..limit]
         (int start, int end) ClampRange(int min, int max, int limit)
         {
             int s = Mathf.Max(0, min);
@@ -51,10 +49,7 @@ public static class DungeonValidator
 
         // Проверим, что start внутри карты
         if (start.x < 0 || start.x >= width || start.y < 0 || start.y >= height)
-        {
-            Debug.LogError("DungeonValidator: стартовая точка вне границ карты!");
             return false;
-        }
 
         visited[start.x, start.y] = true;
         queue.Enqueue(start);
@@ -96,11 +91,7 @@ public static class DungeonValidator
                     }
 
             if (!reached)
-            {
-                Debug.LogError($"Комната {room} недостижима от старта!");
                 return false;
-            }    
-                
         }
         return true;
     }

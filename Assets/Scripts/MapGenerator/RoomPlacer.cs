@@ -5,12 +5,6 @@ using UnityEngine;
 
 public static class RoomPlacer
 {
-    /// <summary>
-    /// Размещает прямоугольные комнаты по графу:
-    /// – пробуем поставить по спирали так, чтобы не пересекались;
-    /// – как только нашли положение без пересечений, жёстко клэмпим
-    ///   в границы карты и возвращаем.
-    /// </summary>
     public static RoomLayout Place(RoomGraph graph, DungeonSettings settings)
     {
         var rnd = new System.Random(settings.seed);
@@ -51,13 +45,7 @@ public static class RoomPlacer
             // если не пересекается — клэмпим и возвращаем
             bool overlaps = existing.Any(o => o.Overlaps(candidate));
             if (!overlaps)
-            {
-                //int clampedX = Mathf.Clamp(candidate.x,
-                //    0, settings.mapWidth - w);
-                //int clampedY = Mathf.Clamp(candidate.y,
-                //    0, settings.mapHeight - h);
                 return new RectInt(candidate.x, candidate.y, w, h);
-            }
 
             // иначе спиральное смещение
             int dx = (attempt % 2 == 0
@@ -70,12 +58,6 @@ public static class RoomPlacer
             candidate.x = baseX + dx;
             candidate.y = baseY + dy;
         }
-
-        // по окончании попыток — всё равно клэмпим
-        //int finalX = Mathf.Clamp(candidate.x,
-        //    0, settings.mapWidth - w);
-        //int finalY = Mathf.Clamp(candidate.y,
-        //    0, settings.mapHeight - h);
         return new RectInt(candidate.x, candidate.y, w, h);
     }
 }

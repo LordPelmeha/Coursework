@@ -1,4 +1,3 @@
-// Assets/Scripts/Data/RoomLayout.cs
 using System.Collections.Generic;
 using UnityEngine;
 

@@ -1,5 +1,4 @@
-﻿// RoomConnector.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,12 +12,10 @@ public static class DrunkardWalkConnector
 
         foreach (var edge in edges)
         {
-            // координаты центров комнат
             Vector2 startF = layout.Rooms[edge.a].center;
             Vector2 targetF = layout.Rooms[edge.b].center;
             Vector2 posF = startF;
 
-            // 0) вырезаем сразу квадрат у входа в комнату A
             AddCorridorBlock(corridors, startF, settings.corridorRadius);
 
             for (int step = 0; step < settings.drunkardWalkLength; step++)
@@ -32,8 +29,6 @@ public static class DrunkardWalkConnector
 
                 AddCorridorBlock(corridors, posF, settings.corridorRadius);
             }
-
-            // Гарантируем выход в комнату B
             AddCorridorBlock(corridors, targetF, settings.corridorRadius);
         }
 
@@ -44,7 +39,6 @@ public static class DrunkardWalkConnector
     {
         int cx = Mathf.RoundToInt(posF.x);
         int cy = Mathf.RoundToInt(posF.y);
-        // квадрат (2r+1)x(2r+1)
         list.Add(new RectInt(cx - r, cy - r, 2 * r + 1, 2 * r + 1));
     }
 }

@@ -5,11 +5,6 @@ using UnityEngine;
 
 public static class GraphGenerator
 {
-    /// <summary>
-    /// √енерирует св€зный граф комнат:
-    /// Ц центры узлов отодвинуты от краЄв на margin = roomMaxSize/2;
-    /// Ц гарантируем MST, а затем добавл€ем neighborCount ближайших соседей.
-    /// </summary>
     public static RoomGraph Generate(DungeonSettings settings)
     {
         var rnd = new System.Random(settings.seed);
@@ -17,7 +12,7 @@ public static class GraphGenerator
         int wLimit = settings.mapWidth - margin;
         int hLimit = settings.mapHeight - margin;
 
-        float minDist = settings.roomMaxSize; 
+        float minDist = settings.roomMaxSize;
         int maxAttemptsPerNode = 100;
 
         var nodes = new List<Vector2Int>();
@@ -44,8 +39,6 @@ public static class GraphGenerator
             }
             if (!placed) minDist -= 1;
         }
-
-        Debug.Log($"GraphGenerator: сгенерировано узлов = {nodes.Count}");
 
         var edges = new HashSet<Edge>();
         var used = new HashSet<int> { 0 };
@@ -85,7 +78,6 @@ public static class GraphGenerator
             foreach (int j in nearest)
                 edges.Add(new Edge(i, j));
         }
-
         return new RoomGraph(nodes, edges.ToList());
     }
 }

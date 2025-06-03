@@ -2,11 +2,6 @@
 
 public static class PostProcessor
 {
-    /// <summary>
-    /// Применяет правило: если у стены меньше deathLimit соседей, становится полом;
-    /// если у пола больше birthLimit соседей, становится стеной.
-    /// Повторить iterations раз.
-    /// </summary>
     public static void Process(RoomLayout layout, DungeonSettings settings)
     {
         int w = settings.mapWidth, h = settings.mapHeight;
